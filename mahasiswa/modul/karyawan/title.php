@@ -201,7 +201,7 @@ error_reporting(0);
                                                   <td><input type="text" readonly="" name="id"></td>
                                               </tr>
                                             <tr>
-                                                <td>NIP</td>
+                                                <td>STB</td>
                                                 <td>
                                                 
                                                 <input type="text" readonly="" class="form-control" name="id_mahasiswa" autocomplete="off" size="25px" maxlength="25px" value="<?php echo $_SESSION

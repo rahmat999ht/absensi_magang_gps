@@ -121,15 +121,7 @@ include ("koneksi.php");
 				</div>
 			</div>
 			<div class="footer-bottom row align-items-center text-center text-lg-left">
-				<p class="footer-text m-0 col-lg-8 col-md-12"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> Muhamad Zibran Fitadiyatama All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
-				<div class="col-lg-4 col-md-12 text-center text-lg-right footer-social">
-					<a href="https://www.facebook.com/zibran.vitadiyatama.7/" target="_blank"><i class="fab fa-facebook-f"></i></a>
-					<a href="https://github.com/ZibranovSky" target="_blank"><i class="fab fa-github"></i></a>
-					<a href="https://www.linkedin.com/in/muhammad-zibran-fitadiyatama-6550801a9/" target="_blank" ><i class="fab fa-linkedin" target="_blank"></i></a>
-					
-				</div>
+
 			</div>
 		</div>
 	</footer>

@@ -185,7 +185,7 @@ error_reporting(0);
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>Nip</th>
+                                            <th>STB</th>
                                             <th>Nama</th>
                                             <th>Tanggal Masuk</th>
                                             <th>Tanggal Keluar</th>

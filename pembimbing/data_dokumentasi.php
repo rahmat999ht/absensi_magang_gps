@@ -187,7 +187,7 @@ session_start();
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>ID Mahasiswa</th>
+                                            <th>STB</th>
                                             <th>Nama</th>
                                             <th>Asal Kampus</th>
                                             <th>Bidang Penempatan</th>

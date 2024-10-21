@@ -187,7 +187,7 @@ session_start();
                                         <table class="table table-borderless table-striped table-earning">
                                             <tbody>
                                                 <tr>
-                                                    <td>NIP</td>
+                                                    <td>STB</td>
                                                     <td>
                                                         <input type="text" class="form-control" maxlength="9" required="" name="id_mahasiswa" autocomplete="off" size="25px" maxlength="25px">
                                                     </td>
@@ -287,7 +287,7 @@ session_start();
                                 <table class="table table-borderless table-striped table-earning">
                                     <thead>
                                         <tr>
-                                            <th>NIP</th>
+                                            <th>STB</th>
                                             <th>Nama</th>
                                             <th>Tempat & tanggal lahir</th>
                                             <th class="text-right">Jenis Kelamin</th>

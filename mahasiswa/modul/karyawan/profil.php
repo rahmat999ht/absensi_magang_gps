@@ -213,7 +213,7 @@ error_reporting(0);
                                         <tbody>
                                               
                                             <tr>
-                                                <td>NIP</td>
+                                                <td>STB</td>
                                                 <td>
                                                 
                                                 <?php echo $r['id_mahasiswa'];?>

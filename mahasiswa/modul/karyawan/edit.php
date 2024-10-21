@@ -207,7 +207,7 @@ error_reporting(0);
                                         <tbody>
                                               
                                             <tr>
-                                                <td>NIP</td>
+                                                <td>STB</td>
                                                 <td>
                                                 	<input type="text" value="<?php echo $r['id_mahasiswa'];?>" name="id_mahasiswa">
                                                 

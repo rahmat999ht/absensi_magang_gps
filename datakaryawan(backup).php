@@ -466,7 +466,7 @@ session_start();
                                         
                                         <tbody>
                                             <tr>
-                                                <td>NIP</td>
+                                                <td>STB</td>
                                                 <td>
                                                 
                                                 <input type="text" class="form-control" name="id_mahasiswa" autocomplete="off" size="25px" maxlength="25px">    
@@ -582,7 +582,7 @@ session_start();
                                     <table class="table table-borderless table-striped table-earning">
                                         <thead>
                                             <tr>
-                                                <th>NIP</th>
+                                                <th>STB</th>
                                                 <th>ID karyawan</th>
                                                 <th>Nama</th>
                                                 <th>Tempat & tanggal lahir</th>

@@ -64,7 +64,7 @@ session_start();
 <body>
 <form action="proedit_mahasiswa.php" method="POST" enctype="multipart/form-data">
   <div class="form-group">
-    <label for="exampleInputEmail1">NIP</label>
+    <label for="exampleInputEmail1">STB</label>
   <input type="text" class="form-control" readonly="" name="id_mahasiswa" autocomplete="off" value="<?php echo $d['id_mahasiswa'];?>">
     
   </div>
