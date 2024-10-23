@@ -44,8 +44,8 @@ error_reporting(0);
 
 <body class="animsition">
     <div class="page-wrapper">
-<!-- HEADER MOBILE-->
-<header class="header-mobile d-block d-lg-none">
+        <!-- HEADER MOBILE-->
+        <header class="header-mobile d-block d-lg-none">
             <div class="header-mobile__bar">
                 <div class="container-fluid">
                     <div class="header-mobile-inner">
@@ -71,17 +71,21 @@ error_reporting(0);
                             </ul>
                         </li>
                         <li>
-                            <a href="data_absen.php">
+                            <a href="/mahasiswa/data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
                         </li>
                         <li>
-                            <a href="data_dokumentasi.php">
+                            <a href="/mahasiswa/data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
+                        <li>
+                            <a href="/mahasiswa/logout.php">
+                                <i class="zmdi zmdi-power"></i>Logout</a>
+                        </li>
+
                     </ul>
                 </div>
             </nav>
-
         </header>
         <!-- END HEADER MOBILE-->
 
@@ -102,15 +106,15 @@ error_reporting(0);
                             </ul>
                         </li>
                         <li>
-                            <a href="data_absen.php">
+                            <a href="/mahasiswa/data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
                         </li>
                         <li>
-                            <a href="data_dokumentasi.php">
+                            <a href="/mahasiswa/data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
                         <li>
-                            <a href="logout.php">Logout</a>
+                            <a href="/mahasiswa/logout.php">Logout</a>
                         </li>
                     </ul>
                 </nav>
@@ -126,64 +130,8 @@ error_reporting(0);
                     <div class="container-fluid">
                         <div class="header-wrap">
                             <form class="form-header" action="" method="POST">
-                                <input class="au-input au-input--xl" type="text" name="search" value="Absen karyawan" readonly="" />
-
+                                <input class="au-input au-input--xl" type="text" name="search" value="absen mahasiswa" readonly="" />
                             </form>
-                            <div class="header-button">
-
-                                <?php
-                                $id = $_SESSION['idsi'];
-                                include '../koneksi.php';
-                                $sql = "SELECT * FROM tb_mahasiswa WHERE id_mahasiswa = '$id'";
-                                $query = mysqli_query($koneksi, $sql);
-                                $r = mysqli_fetch_array($query);
-                                ?>
-
-                                <div class="account-wrap">
-                                    <div class="account-item clearfix js-item-menu">
-                                        <div class="image">
-                                            <img src="../images/<?php echo $r['foto']; ?>" class="img-circle" alt="<?php echo $r['nama']; ?>" />
-                                        </div>
-                                        <div class="content">
-                                            <a class="js-acc-btn" href="#"><?php echo $r['nama']; ?></a>
-                                        </div>
-                                        <div class="account-dropdown js-dropdown">
-                                            <div class="info clearfix">
-                                                <div class="image">
-                                                    <a href="#">
-                                                        <img src="../images/<?php echo $r['foto']; ?>" class="img-circle" \ />
-                                                    </a>
-                                                </div>
-                                                <div class="content">
-                                                    <h5 class="name">
-                                                        <a href="#"><?php echo $r['nama']; ?></a>
-                                                    </h5>
-
-                                                </div>
-                                            </div>
-                                            <div class="account-dropdown__body">
-                                                <div class="account-dropdown__item">
-                                                    <a href="?m=karyawan&s=profil">
-                                                        <i class="zmdi zmdi-account"></i>Account</a>
-                                                </div>
-                                                <!--<div class="account-dropdown__item">
-                                                    <a href="#">
-                                                        <i class="zmdi zmdi-settings"></i>Setting</a>
-                                                </div>
-                                                <div class="account-dropdown__item">
-                                                    <a href="#">
-                                                        <i class="zmdi zmdi-money-box"></i>Billing</a>
-                                                </div>
-                                            </div>-->
-                                                <div class="account-dropdown__footer">
-                                                    <a href="logout.php">
-                                                        <i class="zmdi zmdi-power"></i>Logout</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
             </header>
@@ -202,7 +150,6 @@ error_reporting(0);
                                 </div>
                             </div>
                         </div>
-
 
                         <!-- FORM -->
                         <div class="row">
@@ -238,7 +185,7 @@ error_reporting(0);
                                 </form>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>

@@ -107,7 +107,7 @@ error_reporting(0);
                     <div class="container-fluid">
                         <div class="header-wrap">
                             <form class="form-header" action="" method="POST">
-                                <input class="au-input au-input--xl" type="text" name="search" value="Absen karyawan" readonly="" />
+                                <input class="au-input au-input--xl" type="text" name="search" value="absen mahasiswa" readonly="" />
                                 
                             </form>
                             <div class="header-button">

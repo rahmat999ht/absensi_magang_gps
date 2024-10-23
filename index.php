@@ -49,7 +49,6 @@ include ("koneksi.php");
   </header>
   <!--================Header Menu Area =================-->
 
-
   <main class="side-main">
     <!--================ Hero sm Banner start =================-->      
     <section class="hero-banner mb-30px">
@@ -62,8 +61,8 @@ include ("koneksi.php");
           </div>
           <div class="col-lg-5 pt-5">
             <div class="hero-banner__content">
-              <h1>Tentang Website Ini</h1>
-              <p>Website ini berfungsi sebagai absensi Mahasiswa dalam kegiatan magang.</p>
+              <h1>Absensi Magang</h1>
+              <p>Website ini digunakan sebagai absensi Mahasiswa dalam kegiatan magang.</p>
             </div>
           </div>
         </div>
