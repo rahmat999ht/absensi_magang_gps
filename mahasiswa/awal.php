@@ -71,15 +71,15 @@ error_reporting(0);
                             </ul>
                         </li>
                         <li>
-                            <a href="/mahasiswa/data_absen.php">
+                            <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
                         </li>
                         <li>
-                            <a href="/mahasiswa/data_dokumentasi.php">
+                            <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
                         <li>
-                            <a href="/mahasiswa/logout.php">
+                            <a href="logout.php">
                                 <i class="zmdi zmdi-power"></i>Logout</a>
                         </li>
 
@@ -106,15 +106,15 @@ error_reporting(0);
                             </ul>
                         </li>
                         <li>
-                            <a href="/mahasiswa/data_absen.php">
+                            <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
                         </li>
                         <li>
-                            <a href="/mahasiswa/data_dokumentasi.php">
+                            <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
                         <li>
-                            <a href="/mahasiswa/logout.php">Logout</a>
+                            <a href="logout.php">Logout</a>
                         </li>
                     </ul>
                 </nav>

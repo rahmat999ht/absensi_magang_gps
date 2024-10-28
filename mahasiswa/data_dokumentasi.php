@@ -143,7 +143,7 @@ $id_mahasiswa = $_SESSION['idsi'];
                     <div class="container-fluid">
                         <div class="header-wrap">
                             <form class="form-header" action="" method="POST">
-                                <input class="au-input au-input--xl" type="text" name="search" value="Riwayat Absen" readonly="" />
+                                <input class="au-input au-input--xl" type="text" name="search" value="Riwayat Dokumentasi" readonly="" />
                             </form>
                         </div>
                     </div>
@@ -155,23 +155,21 @@ $id_mahasiswa = $_SESSION['idsi'];
                     <div class="container-fluid">
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
-                                <table class="table table-borderless table-striped table-earning">
+                            <table class="table table-borderless table-striped table-earning">
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>STB</th>
+                                            <th>ID Mahasiswa</th>
                                             <th>Nama</th>
-                                            <th>Tanggal Masuk</th>
-                                            <th>Tanggal Keluar</th>
-                                            <th>Jam Masuk</th>
-                                            <th>Jam Keluar</th>
-                                            <th>Long</th>
-                                            <th>Lat</th>
+                                            <th>Asal Kampus</th>
+                                            <th>Bidang Penempatan</th>
+                                            <th>Nama Kegiatan</th>
+                                            <th>Waktu</th>
                                         </tr>
                                     </thead>
                                     <?php
-                                    // Filter data sesuai dengan id_mahasiswa yang login
-                                    $sql = "SELECT * FROM tb_absensi WHERE id_mahasiswa = '220004'";
+                                    // Menampilkan data dari tb_dokumentasi sesuai dengan id_mahasiswa dari session
+                                    $sql = "SELECT * FROM tb_dokumentasi WHERE id_mahasiswa = '$id_mahasiswa'";
                                     $query = mysqli_query($koneksi, $sql);
                                     $no = 1;
                                     while ($row = mysqli_fetch_array($query)) {
@@ -181,12 +179,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                                 <td><?php echo $no; ?></td>
                                                 <td><?php echo $row['id_mahasiswa']; ?></td>
                                                 <td><?php echo $row['nama']; ?></td>
-                                                <td><?php echo $row['tgl_masuk']; ?></td>
-                                                <td><?php echo $row['tgl_keluar']; ?></td>
-                                                <td><?php echo $row['jam_masuk']; ?></td>
-                                                <td><?php echo $row['jam_keluar']; ?></td>
-                                                <td><?php echo $row['long']; ?></td>
-                                                <td><?php echo $row['lat']; ?></td>
+                                                <td><?php echo $row['asal_kampus']; ?></td>
+                                                <td><?php echo $row['bidang_penempatan']; ?></td>
+                                                <td><?php echo $row['nama_kegiatan']; ?></td>
+                                                <td><?php echo $row['waktu']; ?></td>
                                             </tr>
                                         <?php
                                         $no++;
