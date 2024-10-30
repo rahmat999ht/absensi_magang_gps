@@ -1,5 +1,25 @@
 <?php
+session_start(); // Mulai session
+require_once("../koneksi.php");
 error_reporting(0);
+
+date_default_timezone_set('Asia/Kuala_Lumpur'); // Set time zone secara konsisten
+
+// Cek apakah mahasiswa sudah absen masuk hari ini
+$id_mahasiswa = $_SESSION['idsi'];
+$tanggal_hari_ini = date('Y-m-d');
+
+$query = "SELECT * FROM tb_absensi WHERE id_mahasiswa = ? AND tgl_masuk = ?";
+if ($koneksi) {
+    $stmt = $koneksi->prepare($query);
+    $stmt->bind_param("is", $id_mahasiswa, $tanggal_hari_ini);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $isAlreadyCheckedIn = $result->num_rows > 0;
+} else {
+    echo "Koneksi database tidak berhasil.";
+    exit;
+}
 
 ?>
 
@@ -37,12 +57,22 @@ error_reporting(0);
     <link href="vendor/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" media="all">
 
     <!-- Main CSS-->
-    <link href="css/theme.css" rel="stylesheet" media="all">
+    <link href="css/theme.css" rel="stylesheet" media="all">\
+    <!-- Google Maps API Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+
+    <style>
+        #map {
+            height: 400px;
+            /* Atur tinggi peta sesuai kebutuhan */
+            width: 100%;
+        }
+    </style>
 
 </head>
 <?php date_default_timezone_set('Asia/Jakarta'); ?>
 
-<body class="animsition">
+<body class="animsition" onload="initMap()">
     <div class="page-wrapper">
         <!-- HEADER MOBILE-->
         <header class="header-mobile d-block d-lg-none">
@@ -73,6 +103,10 @@ error_reporting(0);
                         <li>
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
+                        </li>
+                        <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Riwayat Izin</a>
                         </li>
                         <li>
                             <a href="data_dokumentasi.php">
@@ -108,6 +142,10 @@ error_reporting(0);
                         <li>
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
+                        </li>
+                        <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Riwayat Izin</a>
                         </li>
                         <li>
                             <a href="data_dokumentasi.php">
@@ -151,33 +189,64 @@ error_reporting(0);
                             </div>
                         </div>
 
-                        <!-- FORM -->
+                        <!-- FORM ABSENSI -->
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
                                 <form action="dt_absen_sv.php" method="post">
                                     <div class="form-group">
                                         <table class="table table-borderless table-striped table-earning">
-
                                             <tbody>
                                                 <tr>
                                                     <td>STB</td>
-                                                    <td>
-                                                        <input type="text" readonly="" class="form-control" name="id_mahasiswa" autocomplete="off" size="25px" maxlength="25px" value="<?php echo $_SESSION['idsi']; ?>">
-
-                                                    </td>
+                                                    <td><input type="text" readonly class="form-control" name="id_mahasiswa" value="<?php echo $_SESSION['idsi']; ?>"></td>
                                                 </tr>
                                                 <tr>
                                                     <td>Nama</td>
-                                                    <td><input type="text" class="form-control" name="nama" autocomplete="off" readonly="" value="<?php echo $_SESSION['namasi']; ?>"></td>
+                                                    <td><input type="text" readonly class="form-control" name="nama" value="<?php echo $_SESSION['namasi']; ?>"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Waktu</td>
-                                                    <td><input type="text" class="form-control" value="<?php echo date('l, d-m-Y h:i:s a'); ?>" name="waktu" readonly=""></td>
+                                                    <td>Tanggal</td>
+                                                    <td><input type="date" class="form-control" name="tanggal" value="<?php echo date('Y-m-d'); ?>" readonly></td>
                                                 </tr>
                                                 <tr>
+                                                    <td>Jam</td>
+                                                    <td><input type="time" class="form-control" name="jam" value="<?php echo date('H:i', time() + (3600 * 1)); ?>" readonly></td>
+                                                </tr>
+
+                                                <!-- Peta untuk memilih lokasi -->
+                                                <tr>
+                                                    <td>Lokasi</td>
+                                                    <td>
+                                                        <div id="map"></div>
+                                                        <input type="hidden" name="long" id="longitude">
+                                                        <input type="hidden" name="lat" id="latitude">
+                                                    </td>
+                                                </tr>
+                                                <!-- Input Longitude -->
+                                                <!-- <tr>
+                                                    <td>Long</td>
+                                                    <td><input type="text" class="form-control" id="longitude" name="longitude" readonly></td>
+                                                </tr> -->
+                                                <!-- Input Latitude -->
+                                                <!-- <tr>
+                                                    <td>Lat</td>
+                                                    <td><input type="text" class="form-control" id="latitude" name="latitude" readonly></td>
+                                                </tr> -->
+
+                                                <tr>
+                                                    <td>Long</td>
+                                                    <td><input type="text" class="form-control" name="longitude" value="-5.140265823643097" readonly></td>
                                                 </tr>
                                                 <tr>
-                                                    <td><button type="submit" name="simpan" class="btn btn-primary">Absen</button></td>
+                                                    <td>Lat</td>
+                                                    <td><input type="text" class="form-control" name="latitude" value="119.48310235406784" readonly></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>
+                                                        <button type="submit" name="absen_masuk" class="btn btn-primary" <?php if ($isAlreadyCheckedIn) echo 'disabled'; ?> onclick="updateLocationInputs()">Absen Masuk</button>
+                                                        <button type="submit" name="absen_keluar" class="btn btn-danger" <?php if (!$isAlreadyCheckedIn) echo 'disabled'; ?> onclick="updateLocationInputs()">Absen Keluar</button>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -194,6 +263,75 @@ error_reporting(0);
         </div>
 
     </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+
+    <!-- Script untuk Google Maps dan Mendapatkan Lokasi -->
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            // Inisialisasi peta dengan lokasi default jika geolokasi tidak diizinkan atau gagal
+            const defaultLocation = {
+                lat: -6.200000,
+                lng: 106.816666
+            }; // Jakarta
+
+            // Inisialisasi peta
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultLocation,
+                zoom: 13,
+            });
+
+            // Marker default pada lokasi awal
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                draggable: true,
+            });
+
+            // Coba dapatkan lokasi pengguna
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        // Set peta ke lokasi pengguna
+                        map.setCenter(userLocation);
+                        map.setZoom(15);
+
+                        // Pindahkan marker ke lokasi pengguna
+                        marker.setPosition(userLocation);
+
+                        // Update input latitude dan longitude
+                        document.getElementById('latitude').value = userLocation.lat || '-5.140265823643097';
+                        document.getElementById('longitude').value = userLocation.lng || '119.48310235406784';
+                    },
+                    () => {
+                        console.error("Geolocation tidak diizinkan atau terjadi kesalahan.");
+                    }
+                );
+            } else {
+                console.error("Browser ini tidak mendukung Geolocation.");
+            }
+        }
+    </script>
+
+    <script>
+        function updateLocationInputs() {
+            // Ambil posisi marker saat ini
+            const currentLat = marker.getPosition().lat();
+            const currentLng = marker.getPosition().lng();
+
+            // Update input latitude dan longitude dengan posisi marker saat ini
+            document.getElementById('latitude').value = currentLat;
+            document.getElementById('longitude').value = currentLng;
+        }
+    </script>
+
 
     <!-- Jquery JS-->
     <script src="vendor/jquery-3.2.1.min.js"></script>

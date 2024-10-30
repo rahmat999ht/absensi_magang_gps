@@ -52,6 +52,17 @@ $id_mahasiswa = $_SESSION['idsi'];
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- end script-->
+
+    <!-- Google Maps API Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+
+    <style>
+        #map {
+            height: 400px;
+            /* Atur tinggi peta sesuai kebutuhan */
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body class="animsition">
@@ -85,6 +96,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                         <li>
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
+                        </li>
+                        <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Riwayat Izin</a>
                         </li>
                         <li>
                             <a href="data_dokumentasi.php">
@@ -122,6 +137,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                 <i class="fas fa-calendar-alt"></i>Riwayat Absen</a>
                         </li>
                         <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Riwayat Izin</a>
+                        </li>
+                        <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
@@ -155,6 +174,7 @@ $id_mahasiswa = $_SESSION['idsi'];
                     <div class="container-fluid">
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
+                                <!-- Tabel Data dengan Tombol Lihat Lokasi -->
                                 <table class="table table-borderless table-striped table-earning">
                                     <thead>
                                         <tr>
@@ -165,12 +185,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                             <th>Tanggal Keluar</th>
                                             <th>Jam Masuk</th>
                                             <th>Jam Keluar</th>
-                                            <th>Long</th>
-                                            <th>Lat</th>
+                                            <th>Lokasi</th>
                                         </tr>
                                     </thead>
                                     <?php
-                                    // Filter data sesuai dengan id_mahasiswa yang login
                                     $sql = "SELECT * FROM tb_absensi WHERE id_mahasiswa = '220004'";
                                     $query = mysqli_query($koneksi, $sql);
                                     $no = 1;
@@ -185,8 +203,11 @@ $id_mahasiswa = $_SESSION['idsi'];
                                                 <td><?php echo $row['tgl_keluar']; ?></td>
                                                 <td><?php echo $row['jam_masuk']; ?></td>
                                                 <td><?php echo $row['jam_keluar']; ?></td>
-                                                <td><?php echo $row['long']; ?></td>
-                                                <td><?php echo $row['lat']; ?></td>
+                                                <td>
+                                                    <button class="btn btn-info btn-view-location" data-lat="<?php echo $row['lat']; ?>" data-long="<?php echo $row['long']; ?>">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                         <?php
                                         $no++;
@@ -202,29 +223,104 @@ $id_mahasiswa = $_SESSION['idsi'];
 
         </div>
 
-        <!-- Jquery JS-->
-        <script src="../vendor/jquery-3.2.1.min.js"></script>
-        <!-- Bootstrap JS-->
-        <script src="../vendor/bootstrap-4.1/popper.min.js"></script>
-        <script src="../vendor/bootstrap-4.1/bootstrap.min.js"></script>
-        <!-- Vendor JS       -->
-        <script src="../vendor/slick/slick.min.js">
-        </script>
-        <script src="../vendor/wow/wow.min.js"></script>
-        <script src="../vendor/animsition/animsition.min.js"></script>
-        <script src="../vendor/bootstrap-progressbar/bootstrap-progressbar.min.js">
-        </script>
-        <script src="../vendor/counter-up/jquery.waypoints.min.js"></script>
-        <script src="../vendor/counter-up/jquery.counterup.min.js">
-        </script>
-        <script src="../vendor/circle-progress/circle-progress.min.js"></script>
-        <script src="../vendor/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="../vendor/chartjs/Chart.bundle.min.js"></script>
-        <script src="../vendor/select2/select2.min.js">
-        </script>
+    </div>
 
-        <!-- Main JS-->
-        <script src="../js/main.js"></script>
+    <!-- Tambahkan Modal untuk Menampilkan Peta -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Lokasi Absen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Div untuk Google Maps -->
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambahkan Google Maps API Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            // Lokasi default ketika peta pertama kali di-load
+            const defaultLocation = {
+                lat: -6.200000,
+                lng: 106.816666
+            }; // Contoh: Jakarta
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultLocation,
+                zoom: 13,
+            });
+
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+            });
+        }
+
+        function loadLocation(latitude, longitude) {
+            // Pindahkan peta dan marker ke lokasi yang diinginkan
+            const location = {
+                lat: parseFloat(latitude),
+                lng: parseFloat(longitude)
+            };
+            map.setCenter(location);
+            marker.setPosition(location);
+        }
+
+        // Event listener untuk tombol "Lihat"
+        document.querySelectorAll('.btn-view-location').forEach(button => {
+            button.addEventListener('click', function() {
+                const latitude = this.dataset.lat;
+                const longitude = this.dataset.long;
+
+                // Load lokasi pada peta
+                loadLocation(latitude, longitude);
+
+                // Tampilkan modal
+                $('#myModal').modal('show');
+            });
+        });
+    </script>
+
+
+
+    <!-- Jquery JS-->
+    <script src="../vendor/jquery-3.2.1.min.js"></script>
+    <!-- Bootstrap JS-->
+    <script src="../vendor/bootstrap-4.1/popper.min.js"></script>
+    <script src="../vendor/bootstrap-4.1/bootstrap.min.js"></script>
+    <!-- Vendor JS       -->
+    <script src="../vendor/slick/slick.min.js">
+    </script>
+    <script src="../vendor/wow/wow.min.js"></script>
+    <script src="../vendor/animsition/animsition.min.js"></script>
+    <script src="../vendor/bootstrap-progressbar/bootstrap-progressbar.min.js">
+    </script>
+    <script src="../vendor/counter-up/jquery.waypoints.min.js"></script>
+    <script src="../vendor/counter-up/jquery.counterup.min.js">
+    </script>
+    <script src="../vendor/circle-progress/circle-progress.min.js"></script>
+    <script src="../vendor/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="../vendor/chartjs/Chart.bundle.min.js"></script>
+    <script src="../vendor/select2/select2.min.js">
+    </script>
+
+    <!-- Main JS-->
+    <script src="../js/main.js"></script>
 
 </body>
 

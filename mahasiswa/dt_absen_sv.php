@@ -1,21 +1,49 @@
 <?php
 include '../koneksi.php';
-if (isset($_POST['simpan'])) {
-	$id_mahasiswa = $_POST['id_mahasiswa'];
-	$nama = $_POST['nama'];
-	$waktu = $_POST['waktu'];
 
+date_default_timezone_set('Asia/Kuala_Lumpur'); // Set time zone secara konsisten
 
+if (isset($_POST['absen_masuk']) || isset($_POST['absen_keluar'])) {
+    $id_mahasiswa = $_POST['id_mahasiswa'];
+    $nama = $_POST['nama'];
+    $longitude = $_POST['longitude'];
+    $latitude = $_POST['latitude'];
+    $tgl_absen = date("Y-m-d"); // Tanggal absen (hari ini)
+    $jam_sekarang = date("H:i:s"); // Jam saat ini
+
+    // Cek apakah sudah absen untuk hari ini
+    $cek_absen = mysqli_query($koneksi, "SELECT * FROM tb_absensi WHERE id_mahasiswa='$id_mahasiswa' AND tgl_masuk='$tgl_absen'");
+    $data_absen = mysqli_fetch_array($cek_absen);
+
+    if (isset($_POST['absen_masuk'])) {
+        if ($data_absen && !empty($data_absen['jam_masuk'])) {
+            echo "<script>alert('Anda sudah melakukan absen masuk hari ini!');</script>";
+        } else {
+            // Simpan data absen masuk
+            $save = "INSERT INTO `tb_absensi` (`id_mahasiswa`, `nama`, `tgl_masuk`, `jam_masuk`, `long`, `lat`) VALUES ('$id_mahasiswa', '$nama', '$tgl_absen', '$jam_sekarang', '$longitude', '$latitude')";
+            if (mysqli_query($koneksi, $save)) {
+                echo "<script>alert('Absen masuk berhasil!');</script>";
+            } else {
+                echo "<script>alert('Terjadi kesalahan saat menyimpan absen masuk.');</script>";
+            }
+        }
+    } elseif (isset($_POST['absen_keluar'])) {
+        if ($data_absen && !empty($data_absen['jam_keluar'])) {
+            echo "<script>alert('Anda sudah melakukan absen keluar hari ini!');</script>";
+        } else
+		if ($data_absen) {
+            // Update data absen keluar
+            $update = "UPDATE `tb_absensi` SET `jam_keluar`='$jam_sekarang', `tgl_keluar`='$tgl_absen', `long`='$longitude', `lat`='$latitude' WHERE `id_mahasiswa`='$id_mahasiswa' AND `tgl_masuk`='$tgl_absen'";
+            if (mysqli_query($koneksi, $update)) {
+                echo "<script>alert('Absen keluar berhasil!');</script>";
+            } else {
+                echo "<script>alert('Terjadi kesalahan saat menyimpan absen keluar.');</script>";
+            }
+        } else {
+            echo "<script>alert('Anda belum melakukan absen masuk hari ini!');</script>";
+        }
+    }
+    
+    echo "<script>window.location.href = 'index.php?m=awal';</script>";
 }
-
-$save = "INSERT INTO tb_absensi SET id_mahasiswa='$id_mahasiswa', nama='$nama', waktu='$waktu'";
-mysqli_query($koneksi, $save);
-
-if ($save) {
-	echo "<script>alert('Anda sudah absen untuk hari ini') </script>";
-	 echo "<script>window.location.href = \"index.php?m=awal\" </script>";	
-}else{
-	echo "kryptosssss";
-}
-
- ?>
+?>
