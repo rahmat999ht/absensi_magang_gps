@@ -54,7 +54,7 @@ $id_mahasiswa = $_SESSION['idsi'];
     <!-- end script-->
 
     <!-- Google Maps API Script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
     <style>
         #map {
@@ -247,7 +247,7 @@ $id_mahasiswa = $_SESSION['idsi'];
     </div>
 
     <!-- Tambahkan Google Maps API Script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
     <script>
         let map;

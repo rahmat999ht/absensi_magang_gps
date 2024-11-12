@@ -1,16 +1,16 @@
 
-<?php 
+<?php
 
-  include_once "../koneksi.php";
+include_once "../koneksi.php";
 
-  $username = $_POST['username'];
-  $pass = md5($_POST['password']);
-  $sql = "SELECT * FROM tb_mahasiswa WHERE username='$username' AND password='$pass'";
- $login=mysqli_query($koneksi,$sql);
-  $ketemu=mysqli_num_rows($login);
-  $b=mysqli_fetch_array($login);
+$username = $_POST['username'];
+$pass = md5($_POST['password']);
+$sql = "SELECT * FROM tb_mahasiswa WHERE username='$username' AND password='$pass'";
+$login = mysqli_query($koneksi, $sql);
+$ketemu = mysqli_num_rows($login);
+$b = mysqli_fetch_array($login);
 
-  if($ketemu>0){
+if ($ketemu > 0) {
     session_start();
     $_SESSION['idsi']   = $b['id_mahasiswa'];
     $_SESSION['usersi'] = $b['username'];
@@ -22,14 +22,14 @@
     $_SESSION['teleponsi'] = $b['no_tel'];
     $_SESSION['fotosi'] = $b['foto'];
     header("location: index.php?m=awal");
-}else{
-    
+} else {
+
     echo '<script language="javascript">';
-        echo 'alert ("Username/Password ada yang salah, atau akun anda belum Aktif")';
+    echo 'alert ("Username/Password ada yang salah, atau akun anda belum Aktif")';
     echo '</script>';
     header("location: login_mahasiswa.php");
 }
-  
 
- ?>
+
+?>
 

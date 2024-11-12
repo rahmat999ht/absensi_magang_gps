@@ -246,10 +246,10 @@ session_start();
                                                     <td>No Telepon</td>
                                                     <td><input type="text" autocomplete="off" maxlength="18" required="" class="form-control" name="no_tel"></td>
                                                 </tr>
-                                                <!-- <tr>
+                                                <tr>
                                                     <td>Foto</td>
                                                     <td><input type="file" name="foto" required=""></td>
-                                                </tr> -->
+                                                </tr>
                                                 <tr>
                                                     <td><button type="submit" name="simpan" class="btn btn-primary">Simpan</button></td>
                                                     <td><input type="reset" name="" value="Batal" class="btn btn-danger"></td>
@@ -291,10 +291,6 @@ session_start();
                                             <th>Nama</th>
                                             <th>Tempat & tanggal lahir</th>
                                             <th class="text-right">Jenis Kelamin</th>
-                                            <th class="text-right">Agama</th>
-                                            <th>Alamat</th>
-                                            <th>Nomor Telepon</th>
-                                            <th></th>
                                             <th>Foto</th>
                                             <th>Aksi</th>
                                         </tr>

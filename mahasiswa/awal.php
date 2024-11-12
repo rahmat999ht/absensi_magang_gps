@@ -58,7 +58,7 @@ if ($koneksi) {
     <!-- Main CSS-->
     <link href="css/theme.css" rel="stylesheet" media="all">\
     <!-- Google Maps API Script -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
     <style>
         #map {
@@ -263,7 +263,7 @@ if ($koneksi) {
 
     </div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOssb231tnM5UJAYMLxlRFN5X0-6IEXvM&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
     <!-- Script untuk Google Maps dan Mendapatkan Lokasi -->
     <script>
