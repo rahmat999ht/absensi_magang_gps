@@ -56,7 +56,7 @@ $id_mahasiswa = $_SESSION['idsi'];
 
 <body class="animsition">
     <div class="page-wrapper">
-        <!-- HEADER MOBILE-->
+            <!-- HEADER MOBILE-->
         <header class="header-mobile d-block d-lg-none">
             <div class="header-mobile__bar">
                 <div class="container-fluid">
@@ -93,6 +93,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
+                        </li>
+                        <li>
+                            <a href="profil.php">
+                                <i class="fas fa-calendar-alt"></i>Profil</a>
                         </li>
                         <li>
                             <a href="logout.php">
@@ -134,6 +138,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
                         <li>
+                            <a href="profil.php">
+                                <i class="fas fa-calendar-alt"></i>Profil</a>
+                        </li>
+                        <li>
                             <a href="logout.php">Logout</a>
                         </li>
                     </ul>
@@ -141,7 +149,6 @@ $id_mahasiswa = $_SESSION['idsi'];
             </div>
         </aside>
         <!-- END MENU SIDEBAR-->
-
 
         <!-- PAGE CONTAINER-->
         <div class="page-container">

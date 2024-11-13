@@ -106,6 +106,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
                         </li>
                         <li>
+                            <a href="profil.php">
+                                <i class="fas fa-calendar-alt"></i>Profil</a>
+                        </li>
+                        <li>
                             <a href="logout.php">
                                 <i class="zmdi zmdi-power"></i>Logout</a>
                         </li>
@@ -143,6 +147,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Riwayat Dokumentasi</a>
+                        </li>
+                        <li>
+                            <a href="profil.php">
+                                <i class="fas fa-calendar-alt"></i>Profil</a>
                         </li>
                         <li>
                             <a href="logout.php">Logout</a>

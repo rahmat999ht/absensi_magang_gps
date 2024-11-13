@@ -72,7 +72,7 @@ while ($d = mysqli_fetch_array($data)) {
               <td>Foto</td>
               <td>
                 <?php if ($d['foto'] != '') : ?>
-                  <img src="../images/<?php echo $d['foto']; ?>" height="150" />
+                  <img src="../images/<?php echo $d['foto']; ?>" width="400" height="200"/>
                 <?php else : ?>
                   <p>Tidak ada gambar</p>
                 <?php endif; ?>
