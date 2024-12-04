@@ -5,6 +5,12 @@ error_reporting(0);
 
 // Ambil id mahasiswa dari session
 $id_mahasiswa = $_SESSION['idsi'];
+
+// Query untuk menghitung total izin
+$total_izin_sql = "SELECT COUNT(*) AS total_izin FROM tb_izin WHERE id_mahasiswa = '$id_mahasiswa'";
+$total_izin_query = mysqli_query($koneksi, $total_izin_sql);
+$total_izin_data = mysqli_fetch_assoc($total_izin_query);
+$total_izin = $total_izin_data['total_izin'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +62,7 @@ $id_mahasiswa = $_SESSION['idsi'];
 
 <body class="animsition">
     <div class="page-wrapper">
-            <!-- HEADER MOBILE-->
+        <!-- HEADER MOBILE-->
         <header class="header-mobile d-block d-lg-none">
             <div class="header-mobile__bar">
                 <div class="container-fluid">
@@ -168,6 +174,14 @@ $id_mahasiswa = $_SESSION['idsi'];
             <div class="main-content">
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
+                        <!-- Menampilkan Total Izin -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <h4>Total Izin: <?php echo $total_izin; ?></h4>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
                                 <form action="dt_izin_sv.php" method="post">

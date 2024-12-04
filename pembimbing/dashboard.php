@@ -1,3 +1,21 @@
+<?php
+session_start(); // Mulai session
+include '../koneksi.php';
+$id_pembimbing = $_SESSION['id_pembimbing'];  // Asumsi id_pembimbing disimpan di session setelah login
+
+// Ambil nama kelompok untuk pembimbing yang sedang login
+$sql_kelompok = "
+    SELECT k.nama_kelompok
+    FROM tb_kelompok k
+    JOIN tb_kelompok_pembimbing kp ON k.id_kelompok = kp.id_kelompok
+    WHERE kp.id_pembimbing = '$id_pembimbing'
+";
+$query_kelompok = mysqli_query($koneksi, $sql_kelompok);
+$kelompok = mysqli_fetch_assoc($query_kelompok);
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -77,6 +95,10 @@
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
                         <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Data Izin</a>
+                        </li>
+                        <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
                         </li>
@@ -117,6 +139,10 @@
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
                         <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Data Izin</a>
+                        </li>
+                        <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
                         </li>
@@ -155,20 +181,77 @@
             <div class="main-content">
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <!-- Alert box for Nama Kelompok -->
+                                <div class="alert alert-info">
+                                    <h4>Nama Kelompok: <?php echo $kelompok['nama_kelompok']; ?></h4>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
-                            <center><img src="../img/logokaryawan.png" width="500" class="img img-responsive" height="500"></center><br>
+                            <table class='table table-borderless table-striped table-earning'>
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>STB</th>
+                                        <th>Total Absen</th>
+                                        <th>Total Izin</th>
+                                        <th>Total Sakit</th>
+                                        <th>Total Keperluan Keluarga</th>
+                                        <th>Total Dokumentasi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $sql = "
+        SELECT 
+            m.id_mahasiswa,
+            m.nama,
+            COUNT(DISTINCT a.id) AS total_absen,
+            COUNT(DISTINCT i.id) AS total_izin,
+            COUNT(DISTINCT CASE WHEN i.keterangan = 'Sakit' THEN i.id END) AS total_izin_sakit,
+            COUNT(DISTINCT CASE WHEN i.keterangan = 'Keperluan Keluarga' THEN i.id END) AS total_izin_keperluan_keluarga,
+            COUNT(DISTINCT d.id) AS total_dokumentasi
+        FROM tb_mahasiswa m
+        LEFT JOIN tb_absensi a ON m.id_mahasiswa = a.id_mahasiswa
+        LEFT JOIN tb_izin i ON m.id_mahasiswa = i.id_mahasiswa
+        LEFT JOIN tb_dokumentasi d ON m.id_mahasiswa = d.id_mahasiswa
+        LEFT JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = a.id_kelompok
+        WHERE kp.id_pembimbing = '$id_pembimbing'
+        GROUP BY m.id_mahasiswa
+        ";
+
+                                    $query = mysqli_query($koneksi, $sql);
+                                    $no = 1;
+                                    while ($row = mysqli_fetch_array($query)) {
+                                    ?>
+                                        <tr>
+                                            <td><?php echo $no; ?></td>
+                                            <td><?php echo $row['id_mahasiswa']; ?></td>
+                                            <td><?php echo $row['nama']; ?></td>
+                                            <td><?php echo $row['total_absen']; ?></td>
+                                            <td><?php echo $row['total_izin']; ?></td>
+                                            <td><?php echo $row['total_izin_sakit']; ?></td>
+                                            <td><?php echo $row['total_izin_keperluan_keluarga']; ?></td>
+                                            <td><?php echo $row['total_dokumentasi']; ?></td>
+                                        </tr>
+                                    <?php
+                                        $no++;
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <div class="row">
                             <strong class="col-md-12" style="margin-top: 5rem;">Selamat datang pembimbing magang</strong>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    </div>
-    <!-- END MAIN CONTENT-->
-    <!-- END PAGE CONTAINER-->
-    </div>
-
     </div>
 
     <!-- Jquery JS-->

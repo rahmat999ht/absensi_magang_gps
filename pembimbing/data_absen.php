@@ -1,6 +1,48 @@
 <?php
+session_start();
 require_once("../koneksi.php");
 error_reporting(0);
+
+$id_pembimbing = $_SESSION['id_pembimbing'];
+// Ambil nama kelompok untuk pembimbing yang sedang login
+$sql_kelompok = "
+    SELECT k.nama_kelompok
+    FROM tb_kelompok k
+    JOIN tb_kelompok_pembimbing kp ON k.id_kelompok = kp.id_kelompok
+    WHERE kp.id_pembimbing = '$id_pembimbing'
+";
+$query_kelompok = mysqli_query($koneksi, $sql_kelompok);
+$kelompok = mysqli_fetch_assoc($query_kelompok);
+
+// Konfigurasi Pagination
+$per_halaman = 5; // Jumlah data per halaman
+$halaman = isset($_GET['halaman']) ? (int)$_GET['halaman'] : 1;
+$mulai = ($halaman > 1) ? ($halaman * $per_halaman) - $per_halaman : 0;
+
+// Query untuk menghitung total data
+$sql_count = "
+SELECT COUNT(*) AS total 
+FROM tb_absensi a
+JOIN tb_mahasiswa m ON a.id_mahasiswa = m.id_mahasiswa
+JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = a.id_kelompok
+WHERE kp.id_pembimbing = '$id_pembimbing'
+";
+
+$query_count = mysqli_query($koneksi, $sql_count);
+$total_data = mysqli_fetch_assoc($query_count)['total'];
+$total_halaman = ceil($total_data / $per_halaman);
+
+// Query untuk data sesuai halaman
+$sql_pagination = "
+SELECT a.*, m.nama, m.id_mahasiswa
+FROM tb_absensi a
+JOIN tb_mahasiswa m ON a.id_mahasiswa = m.id_mahasiswa
+JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = a.id_kelompok
+WHERE kp.id_pembimbing = '$id_pembimbing'
+LIMIT $mulai, $per_halaman
+";
+$query_pagination = mysqli_query($koneksi, $sql_pagination);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,6 +90,16 @@ error_reporting(0);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- end script-->
+    <!-- Google Maps API Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
+
+    <style>
+        #map {
+            height: 400px;
+            /* Atur tinggi peta sesuai kebutuhan */
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body class="animsition">
@@ -92,6 +144,10 @@ error_reporting(0);
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
                         <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Data Izin</a>
+                        </li>
+                        <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
                         </li>
@@ -130,6 +186,10 @@ error_reporting(0);
                         <li>
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
+                        </li>
+                        <li>
+                            <a href="data_izin.php">
+                                <i class="fas fa-calendar-alt"></i>Data Izin</a>
                         </li>
                         <li>
                             <a href="data_dokumentasi.php">
@@ -177,9 +237,52 @@ error_reporting(0);
             <div class="main-content">
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <!-- Alert box for Nama Kelompok -->
+                                <div class="alert alert-info">
+                                    <h4>Nama Kelompok: <?php echo $kelompok['nama_kelompok']; ?></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card for total absensi per mahasiswa -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Total Absensi per Mahasiswa</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php
+                                        // Query to count the total absensi per mahasiswa
+                                        $sql_absensi_count = "
+                SELECT 
+                    m.id_mahasiswa,
+                    m.nama,
+                    COUNT(DISTINCT a.id) AS total_absensi
+                FROM tb_absensi a
+                JOIN tb_mahasiswa m ON a.id_mahasiswa = m.id_mahasiswa
+                JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = a.id_kelompok
+                WHERE kp.id_pembimbing = '$id_pembimbing'
+                GROUP BY m.id_mahasiswa
+                ";
+
+                                        // Execute the query to get the count of absensi per mahasiswa
+                                        $result_absensi_count = mysqli_query($koneksi, $sql_absensi_count);
+
+                                        // Fetch and display the total absensi for each mahasiswa
+                                        while ($row_absensi_count = mysqli_fetch_array($result_absensi_count)) {
+                                        ?>
+                                            <p><?php echo $row_absensi_count['id_mahasiswa']; ?> <?php echo $row_absensi_count['nama']; ?> memiliki total absensi: <strong><?php echo $row_absensi_count['total_absensi']; ?></strong></p>
+                                        <?php
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row">
-
                             <div class="table-responsive table--no-card m-b-30">
                                 <table class="table table-borderless table-striped table-earning">
                                     <thead>
@@ -191,51 +294,129 @@ error_reporting(0);
                                             <th>Tanggal Keluar</th>
                                             <th>Jam Masuk</th>
                                             <th>Jam Keluar</th>
-                                            <th>Long</th>
-                                            <th>Lat</th>
-                                            <th>aksi</th>
-
+                                            <th>Lokasi</th>
+                                            <!-- <th>aksi</th> -->
                                         </tr>
                                     </thead>
                                     <?php
                                     include '../koneksi.php';
-                                    $sql = "SELECT * FROM tb_absensi";
-                                    $query = mysqli_query($koneksi, $sql);
-
-                                    $no = 1;
-                                    while ($row = mysqli_fetch_array($query)) {
+                                    // $sql = "SELECT * FROM tb_absensi";
+                                    // Query untuk mendapatkan data absensi berdasarkan pembimbing yang login
+                                    $no = $mulai + 1; // Penomoran data sesuai halaman
+                                    while ($row = mysqli_fetch_array($query_pagination)) {
                                     ?>
-                                        <tbody>
-                                            <tr>
-                                                <td><?php echo $no; ?></td>
-                                                <td><?php echo $row['id_mahasiswa']; ?></td>
-                                                <td><?php echo $row['nama']; ?></td>
-                                                <td><?php echo $row['tgl_masuk']; ?></td>
-                                                <td><?php echo $row['tgl_keluar']; ?></td>
-                                                <td><?php echo $row['jam_masuk']; ?></td>
-                                                <td><?php echo $row['jam_keluar']; ?></td>
-                                                <td><?php echo $row['long']; ?></td>
-                                                <td><?php echo $row['lat']; ?></td>
-
-                                                <td> <a href="hapus_absen.php?id=<?php echo $row['id']; ?>"><button class="btn btn-danger" onclick="return confirm('yakin ingin dihapus?');">Hapus</button></a></td>
-
-
-
-                                            </tr>
-                                        <?php
+                                        <tr>
+                                            <td><?php echo $no; ?></td>
+                                            <td><?php echo $row['id_mahasiswa']; ?></td>
+                                            <td><?php echo $row['nama']; ?></td>
+                                            <td><?php echo $row['tgl_masuk']; ?></td>
+                                            <td><?php echo $row['tgl_keluar']; ?></td>
+                                            <td><?php echo $row['jam_masuk']; ?></td>
+                                            <td><?php echo $row['jam_keluar']; ?></td>
+                                            <td>
+                                                <button class="btn btn-info btn-view-location" data-lat="<?php echo $row['lat']; ?>" data-long="<?php echo $row['long']; ?>">
+                                                    Lihat Lokasi
+                                                </button>
+                                            </td>
+                                            <!-- <td>
+                                                <a href="hapus_absen.php?id=<?php echo $row['id']; ?>">
+                                                    <button class="btn btn-danger" onclick="return confirm('Yakin ingin dihapus?');">Hapus</button>
+                                                </a>
+                                            </td> -->
+                                        </tr>
+                                    <?php
                                         $no++;
                                     }
-
-                                        ?>
-                                        </tbody>
+                                    ?>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item <?php echo ($halaman <= 1) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="?halaman=<?php echo $halaman - 1; ?>">Previous</a>
+                            </li>
+                            <?php for ($x = 1; $x <= $total_halaman; $x++) { ?>
+                                <li class="page-item <?php echo ($halaman == $x) ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?halaman=<?php echo $x; ?>"><?php echo $x; ?></a>
+                                </li>
+                            <?php } ?>
+                            <li class="page-item <?php echo ($halaman >= $total_halaman) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="?halaman=<?php echo $halaman + 1; ?>">Next</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-
         </div>
+
+        <!-- Modal untuk Menampilkan Peta -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Lokasi Absen</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="map"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
+
+        <script>
+            let map;
+            let marker;
+
+            function initMap() {
+                const defaultLocation = {
+                    lat: -6.200000,
+                    lng: 106.816666
+                };
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: defaultLocation,
+                    zoom: 13,
+                });
+                marker = new google.maps.Marker({
+                    position: defaultLocation,
+                    map: map,
+                });
+            }
+
+            function loadLocation(latitude, longitude) {
+                const location = {
+                    lat: parseFloat(latitude),
+                    lng: parseFloat(longitude)
+                };
+                map.setCenter(location);
+                marker.setPosition(location);
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll('.btn-view-location').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const latitude = this.getAttribute('data-lat');
+                        const longitude = this.getAttribute('data-long');
+
+                        loadLocation(latitude, longitude);
+
+                        $('#myModal').on('shown.bs.modal', function() {
+                            google.maps.event.trigger(map, "resize");
+                            map.setCenter({
+                                lat: parseFloat(latitude),
+                                lng: parseFloat(longitude)
+                            });
+                        }).modal('show');
+                    });
+                });
+            });
+        </script>
 
         <!-- Jquery JS-->
         <script src="../vendor/jquery-3.2.1.min.js"></script>

@@ -5,6 +5,13 @@ error_reporting(0);
 
 // Ambil id mahasiswa dari session
 $id_mahasiswa = $_SESSION['idsi'];
+
+// Ambil id_kelompok milik mahasiswa berdasarkan id_mahasiswa yang sedang login
+$query = "SELECT id_kelompok FROM tb_mahasiswa_kelompok WHERE id_mahasiswa = '$id_mahasiswa'";
+$result = mysqli_query($koneksi, $query);
+$data_mahasiswa = mysqli_fetch_assoc($result);
+$id_kelompok_mahasiswa = $data_mahasiswa['id_kelompok'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -182,13 +189,30 @@ $id_mahasiswa = $_SESSION['idsi'];
                     <div class="container-fluid">
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
-                                <!-- Tabel Data dengan Tombol Lihat Lokasi -->
+                                <?php
+                                // Query untuk menghitung total absensi
+                                $total_absensi_sql = "SELECT COUNT(*) AS total_absensi
+                                FROM tb_absensi
+                                WHERE id_mahasiswa = $id_mahasiswa";
+                                $total_absensi_query = mysqli_query($koneksi, $total_absensi_sql);
+                                $total_absensi_data = mysqli_fetch_assoc($total_absensi_query);
+                                $total_absensi = $total_absensi_data['total_absensi'];
+                                ?>
+
+                                <!-- Menampilkan Total Absensi -->
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-info">
+                                            <h4>Total Absensi: <?php echo $total_absensi; ?></h4>
+                                        </div>
+                                    </div>
+                                </div>
                                 <table class="table table-borderless table-striped table-earning">
                                     <thead>
                                         <tr>
                                             <th>No</th>
-                                            <th>STB</th>
-                                            <th>Nama</th>
+                                            <th>Nama Mahasiswa</th>
+                                            <th>Nama Kelompok</th>
                                             <th>Tanggal Masuk</th>
                                             <th>Tanggal Keluar</th>
                                             <th>Jam Masuk</th>
@@ -196,17 +220,29 @@ $id_mahasiswa = $_SESSION['idsi'];
                                             <th>Lokasi</th>
                                         </tr>
                                     </thead>
-                                    <?php
-                                    $sql = "SELECT * FROM tb_absensi WHERE id_mahasiswa = '220004'";
-                                    $query = mysqli_query($koneksi, $sql);
-                                    $no = 1;
-                                    while ($row = mysqli_fetch_array($query)) {
-                                    ?>
-                                        <tbody>
+                                    <tbody>
+                                        <?php
+                                        // Mengambil data absensi beserta nama mahasiswa dan kelompok
+                                        $sql = "
+            SELECT 
+                tb_absensi.*, 
+                tb_mahasiswa.nama AS nama_mahasiswa,
+                tb_kelompok.nama_kelompok
+            FROM tb_absensi
+            JOIN tb_mahasiswa ON tb_absensi.id_mahasiswa = tb_mahasiswa.id_mahasiswa
+            JOIN tb_kelompok ON tb_absensi.id_kelompok = tb_kelompok.id_kelompok
+            WHERE tb_absensi.id_mahasiswa = $id_mahasiswa
+        ";
+
+                                        $query = mysqli_query($koneksi, $sql);
+                                        $no = 1;
+
+                                        while ($row = mysqli_fetch_assoc($query)) {
+                                        ?>
                                             <tr>
-                                                <td><?php echo $no; ?></td>
-                                                <td><?php echo $row['id_mahasiswa']; ?></td>
-                                                <td><?php echo $row['nama']; ?></td>
+                                                <td><?php echo $no++; ?></td>
+                                                <td><?php echo $row['nama_mahasiswa']; ?></td>
+                                                <td><?php echo $row['nama_kelompok']; ?></td>
                                                 <td><?php echo $row['tgl_masuk']; ?></td>
                                                 <td><?php echo $row['tgl_keluar']; ?></td>
                                                 <td><?php echo $row['jam_masuk']; ?></td>
@@ -217,12 +253,10 @@ $id_mahasiswa = $_SESSION['idsi'];
                                                     </button>
                                                 </td>
                                             </tr>
-                                        <?php
-                                        $no++;
-                                    }
-                                        ?>
-                                        </tbody>
+                                        <?php } ?>
+                                    </tbody>
                                 </table>
+
                             </div>
                         </div>
                     </div>
@@ -233,19 +267,16 @@ $id_mahasiswa = $_SESSION['idsi'];
 
     </div>
 
-    <!-- Tambahkan Modal untuk Menampilkan Peta -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+    <!-- Modal untuk Menampilkan Peta -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Lokasi Absen</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title">Lokasi Absen</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- Div untuk Google Maps -->
-                    <div id="map" style="height: 400px; width: 100%;"></div>
+                    <div id="map"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -254,7 +285,6 @@ $id_mahasiswa = $_SESSION['idsi'];
         </div>
     </div>
 
-    <!-- Tambahkan Google Maps API Script -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
     <script>
@@ -262,17 +292,14 @@ $id_mahasiswa = $_SESSION['idsi'];
         let marker;
 
         function initMap() {
-            // Lokasi default ketika peta pertama kali di-load
             const defaultLocation = {
                 lat: -6.200000,
                 lng: 106.816666
-            }; // Contoh: Jakarta
-
+            };
             map = new google.maps.Map(document.getElementById("map"), {
                 center: defaultLocation,
                 zoom: 13,
             });
-
             marker = new google.maps.Marker({
                 position: defaultLocation,
                 map: map,
@@ -280,7 +307,6 @@ $id_mahasiswa = $_SESSION['idsi'];
         }
 
         function loadLocation(latitude, longitude) {
-            // Pindahkan peta dan marker ke lokasi yang diinginkan
             const location = {
                 lat: parseFloat(latitude),
                 lng: parseFloat(longitude)
@@ -289,22 +315,25 @@ $id_mahasiswa = $_SESSION['idsi'];
             marker.setPosition(location);
         }
 
-        // Event listener untuk tombol "Lihat"
-        document.querySelectorAll('.btn-view-location').forEach(button => {
-            button.addEventListener('click', function() {
-                const latitude = this.dataset.lat;
-                const longitude = this.dataset.long;
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.btn-view-location').forEach(button => {
+                button.addEventListener('click', function() {
+                    const latitude = this.getAttribute('data-lat');
+                    const longitude = this.getAttribute('data-long');
 
-                // Load lokasi pada peta
-                loadLocation(latitude, longitude);
+                    loadLocation(latitude, longitude);
 
-                // Tampilkan modal
-                $('#myModal').modal('show');
+                    $('#myModal').on('shown.bs.modal', function() {
+                        google.maps.event.trigger(map, "resize");
+                        map.setCenter({
+                            lat: parseFloat(latitude),
+                            lng: parseFloat(longitude)
+                        });
+                    }).modal('show');
+                });
             });
         });
     </script>
-
-
 
     <!-- Jquery JS-->
     <script src="../vendor/jquery-3.2.1.min.js"></script>

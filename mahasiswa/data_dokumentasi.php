@@ -5,6 +5,10 @@ error_reporting(0);
 
 // Ambil id mahasiswa dari session
 $id_mahasiswa = $_SESSION['idsi'];
+// Query untuk menghitung total dokumentasi
+$sql_count = "SELECT COUNT(*) AS total_dokumentasi FROM tb_dokumentasi WHERE id_mahasiswa = '$id_mahasiswa'";
+$result_count = mysqli_query($koneksi, $sql_count);
+$total_dokumentasi = mysqli_fetch_assoc($result_count)['total_dokumentasi'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +60,7 @@ $id_mahasiswa = $_SESSION['idsi'];
 
 <body class="animsition">
     <div class="page-wrapper">
-            <!-- HEADER MOBILE-->
+        <!-- HEADER MOBILE-->
         <header class="header-mobile d-block d-lg-none">
             <div class="header-mobile__bar">
                 <div class="container-fluid">
@@ -168,6 +172,13 @@ $id_mahasiswa = $_SESSION['idsi'];
             <div class="main-content">
                 <div class="section__content section__content--p30">
                     <div class="container-fluid">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <h4>Total Dokumentasi: <span class="badge badge-info"><?php echo $total_dokumentasi; ?></span></h4>
+                                </div>
+                            </div>
+                        </div>
                         <!-- FORM DOKUMENTASI -->
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">

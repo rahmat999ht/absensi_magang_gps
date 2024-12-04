@@ -9,10 +9,16 @@ date_default_timezone_set('Asia/Kuala_Lumpur'); // Set time zone secara konsiste
 $id_mahasiswa = $_SESSION['idsi'];
 $tanggal_hari_ini = date('Y-m-d');
 
-$query = "SELECT * FROM tb_absensi WHERE id_mahasiswa = ? AND tgl_masuk = ?";
+// Ambil id_kelompok milik mahasiswa berdasarkan id_mahasiswa yang sedang login
+$query = "SELECT id_kelompok FROM tb_mahasiswa_kelompok WHERE id_mahasiswa = '$id_mahasiswa'";
+$result = mysqli_query($koneksi, $query);
+$data_mahasiswa = mysqli_fetch_assoc($result);
+$id_kelompok_mahasiswa = $data_mahasiswa['id_kelompok'];
+
+$query = "SELECT * FROM tb_absensi WHERE id_kelompok = ? AND tgl_masuk = ?";
 if ($koneksi) {
     $stmt = $koneksi->prepare($query);
-    $stmt->bind_param("is", $id_mahasiswa, $tanggal_hari_ini);
+    $stmt->bind_param("is", $id_kelompok_mahasiswa, $tanggal_hari_ini);
     $stmt->execute();
     $result = $stmt->get_result();
     $isAlreadyCheckedIn = $result->num_rows > 0;
@@ -20,6 +26,14 @@ if ($koneksi) {
     echo "Koneksi database tidak berhasil.";
     exit;
 }
+
+// Ambil nama kelompok berdasarkan id_kelompok
+$query_kelompok = "SELECT * FROM tb_kelompok WHERE id_kelompok = '$id_kelompok_mahasiswa'";
+$result_kelompok = mysqli_query($koneksi, $query_kelompok);
+$data_kelompok = mysqli_fetch_assoc($result_kelompok);
+$nama_kelompok = $data_kelompok['nama_kelompok'];
+$lat_kelompok = $data_kelompok['lat'];
+$lon_kelompok = $data_kelompok['lon'];
 
 ?>
 
@@ -219,36 +233,46 @@ if ($koneksi) {
                                                     <td>Jam</td>
                                                     <td><input type="time" class="form-control" name="jam" value="<?php echo date('H:i', time() + (3600 * 1)); ?>" readonly></td>
                                                 </tr>
-
                                                 <!-- Peta untuk memilih lokasi -->
                                                 <tr>
                                                     <td>Lokasi</td>
                                                     <td>
                                                         <div id="map"></div>
-                                                        <input type="hidden" name="long" id="longitude">
-                                                        <input type="hidden" name="lat" id="latitude">
+                                                        <input type="hidden" name="long2" id="longitude">
+                                                        <input type="hidden" name="lat2" id="latitude">
                                                     </td>
                                                 </tr>
-                                                <!-- Input Longitude -->
-                                                <!-- <tr>
-                                                    <td>Long</td>
-                                                    <td><input type="text" class="form-control" id="longitude" name="longitude" readonly></td>
-                                                </tr> -->
-                                                <!-- Input Latitude -->
-                                                <!-- <tr>
-                                                    <td>Lat</td>
-                                                    <td><input type="text" class="form-control" id="latitude" name="latitude" readonly></td>
-                                                </tr> -->
-
                                                 <tr>
-                                                    <td>Long</td>
-                                                    <td><input type="text" class="form-control" name="longitude" value="-5.140265823643097" readonly></td>
+                                                    <td>Latitude Mahasiswa</td>
+                                                    <td>
+                                                        <input type="text" name="lat" id="form_latitude" readonly class="form-control">
+                                                    </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Lat</td>
-                                                    <td><input type="text" class="form-control" name="latitude" value="119.48310235406784" readonly></td>
+                                                    <td>Longitude Mahasiswa</td>
+                                                    <td>
+                                                        <input type="text" name="long" id="form_longitude" readonly class="form-control">
+                                                    </td>
                                                 </tr>
-
+                                                <tr>
+                                                    <td>Lat Kantor</td>
+                                                    <td>
+                                                        <input type="text" name="lat_kelompok" id="lat_kelompok" readonly class="form-control" value="<?php echo $lat_kelompok; ?>">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Long Kantor</td>
+                                                    <td>
+                                                        <input type="text" name="lon_kelompok" id="lon_kelompok" readonly class="form-control" value="<?php echo $lon_kelompok; ?>">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Kelompok</td>
+                                                    <td>
+                                                        <input type="hidden" name="id_kelompok" id="id_kelompok" readonly class="form-control" value="<?php echo $id_kelompok_mahasiswa; ?>">
+                                                        <input type="text" name="nama_kelompok" id="nama_kelompok" readonly class="form-control" value="<?php echo $nama_kelompok; ?>">
+                                                    </td>
+                                                </tr>
                                                 <tr>
                                                     <td>
                                                         <button type="submit" name="absen_masuk" class="btn btn-primary" <?php if ($isAlreadyCheckedIn) echo 'disabled'; ?> onclick="updateLocationInputs()">Absen Masuk</button>
@@ -273,17 +297,18 @@ if ($koneksi) {
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC1HffggpnBUP6-cp8Gh_0UrfTatAvWKTk&callback=initMap" async defer></script>
 
+
     <!-- Script untuk Google Maps dan Mendapatkan Lokasi -->
     <script>
         let map;
         let marker;
 
         function initMap() {
-            // Inisialisasi peta dengan lokasi default jika geolokasi tidak diizinkan atau gagal
+            // Lokasi default jika geolokasi gagal
             const defaultLocation = {
-                lat: -6.200000,
+                lat: -6.200000, // Jakarta
                 lng: 106.816666
-            }; // Jakarta
+            };
 
             // Inisialisasi peta
             map = new google.maps.Map(document.getElementById("map"), {
@@ -291,7 +316,7 @@ if ($koneksi) {
                 zoom: 13,
             });
 
-            // Marker default pada lokasi awal
+            // Tambahkan marker
             marker = new google.maps.Marker({
                 position: defaultLocation,
                 map: map,
@@ -306,36 +331,41 @@ if ($koneksi) {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                         };
-                        // Set peta ke lokasi pengguna
                         map.setCenter(userLocation);
                         map.setZoom(15);
-
-                        // Pindahkan marker ke lokasi pengguna
                         marker.setPosition(userLocation);
-
-                        // Update input latitude dan longitude
-                        document.getElementById('latitude').value = userLocation.lat || '-5.140265823643097';
-                        document.getElementById('longitude').value = userLocation.lng || '119.48310235406784';
+                        updateLocationInputs(); // Tambahkan untuk memperbarui input saat lokasi ditemukan
                     },
                     () => {
                         console.error("Geolocation tidak diizinkan atau terjadi kesalahan.");
+                        updateLocationInputs(); // Tetap perbarui dengan default lokasi
                     }
                 );
             } else {
                 console.error("Browser ini tidak mendukung Geolocation.");
+                updateLocationInputs(); // Tetap perbarui dengan default lokasi
             }
-        }
-    </script>
 
-    <script>
+            // Event listener saat marker dipindahkan
+            marker.addListener("dragend", () => {
+                const position = marker.getPosition();
+                updateLocationInputs(position.lat(), position.lng());
+            });
+
+            // Event listener saat peta selesai dimuat (idle)
+            map.addListener("idle", () => {
+                const position = marker.getPosition();
+                updateLocationInputs(position.lat(), position.lng());
+            });
+        }
+
+        // Fungsi untuk memperbarui nilai latitude dan longitude di form
         function updateLocationInputs() {
-            // Ambil posisi marker saat ini
             const currentLat = marker.getPosition().lat();
             const currentLng = marker.getPosition().lng();
 
-            // Update input latitude dan longitude dengan posisi marker saat ini
-            document.getElementById('latitude').value = currentLat;
-            document.getElementById('longitude').value = currentLng;
+            document.getElementById('form_latitude').value = currentLat;
+            document.getElementById('form_longitude').value = currentLng;
         }
     </script>
 
