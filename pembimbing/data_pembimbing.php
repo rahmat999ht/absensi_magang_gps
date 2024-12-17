@@ -91,10 +91,10 @@ error_reporting(0);
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="data_izin.php">
                                 <i class="fas fa-calendar-alt"></i>Data Izin</a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
@@ -135,10 +135,10 @@ error_reporting(0);
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="data_izin.php">
                                 <i class="fas fa-calendar-alt"></i>Data Izin</a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>

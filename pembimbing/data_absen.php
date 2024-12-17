@@ -43,6 +43,41 @@ LIMIT $mulai, $per_halaman
 ";
 $query_pagination = mysqli_query($koneksi, $sql_pagination);
 
+
+// Pagination
+$limit = 5; // Jumlah data per halaman
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Halaman aktif
+$page = max($page, 1); // Pastikan halaman minimal 1
+$offset = ($page - 1) * $limit; // Hitung offset
+
+// Query total data untuk pagination
+$sql_count = "
+    SELECT COUNT(*) AS total
+    FROM tb_izin i
+    JOIN tb_mahasiswa m ON i.id_mahasiswa = m.id_mahasiswa
+    JOIN tb_mahasiswa_kelompok mk ON mk.id_mahasiswa = m.id_mahasiswa
+    JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = mk.id_kelompok
+    JOIN tb_pembimbing p ON kp.id_pembimbing = p.id
+    WHERE p.id = '$id_pembimbing'
+";
+$result_count = mysqli_query($koneksi, $sql_count);
+$total_data = mysqli_fetch_assoc($result_count)['total'];
+$total_pages = ceil($total_data / $limit);
+
+// Query data izin dengan pagination
+$sql_izin = "
+    SELECT i.*, m.nama, m.id_mahasiswa
+    FROM tb_izin i
+    JOIN tb_mahasiswa m ON i.id_mahasiswa = m.id_mahasiswa
+    JOIN tb_mahasiswa_kelompok mk ON mk.id_mahasiswa = m.id_mahasiswa
+    JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = mk.id_kelompok
+    JOIN tb_pembimbing p ON kp.id_pembimbing = p.id
+    WHERE p.id = '$id_pembimbing'
+    LIMIT $limit OFFSET $offset
+";
+$query_izin = mysqli_query($koneksi, $sql_izin);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -143,10 +178,10 @@ $query_pagination = mysqli_query($koneksi, $sql_pagination);
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="data_izin.php">
                                 <i class="fas fa-calendar-alt"></i>Data Izin</a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
@@ -187,10 +222,10 @@ $query_pagination = mysqli_query($koneksi, $sql_pagination);
                             <a href="data_absen.php">
                                 <i class="fas fa-calendar-alt"></i>Data Absen</a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="data_izin.php">
                                 <i class="fas fa-calendar-alt"></i>Data Izin</a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="data_dokumentasi.php">
                                 <i class="fas fa-calendar-alt"></i>Data Dokumentasi</a>
@@ -239,48 +274,90 @@ $query_pagination = mysqli_query($koneksi, $sql_pagination);
                     <div class="container-fluid">
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <!-- Alert box for Nama Kelompok -->
                                 <div class="alert alert-info">
                                     <h4>Nama Kelompok: <?php echo $kelompok['nama_kelompok']; ?></h4>
                                 </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4>Statistik Kehadiran per Mahasiswa</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <?php
+                                                $sql_statistik = "
+                                                SELECT 
+                                                    m.id_mahasiswa,
+                                                    m.nama,
+                                                    COUNT(DISTINCT a.id) AS total_hadir,
+                                                    COUNT(CASE WHEN i.keterangan = 'Izin' THEN 1 END) AS total_izin,
+                                                    COUNT(CASE WHEN i.keterangan = 'Sakit' THEN 1 END) AS total_sakit
+                                                FROM tb_mahasiswa m
+                                                JOIN tb_mahasiswa_kelompok mk ON m.id_mahasiswa = mk.id_mahasiswa
+                                                JOIN tb_kelompok_pembimbing kp ON mk.id_kelompok = kp.id_kelompok
+                                                LEFT JOIN tb_absensi a ON m.id_mahasiswa = a.id_mahasiswa AND a.id_kelompok = mk.id_kelompok
+                                                LEFT JOIN tb_izin i ON m.id_mahasiswa = i.id_mahasiswa AND i.id_kelompok = mk.id_kelompok
+                                                WHERE kp.id_pembimbing = '$id_pembimbing'
+                                                GROUP BY m.id_mahasiswa
+                                                ";
+
+                                                $sql_izin_detail = "
+                                                SELECT 
+                                                    m.id_mahasiswa,
+                                                    m.nama,
+                                                    i.keterangan,
+                                                    i.alasan,
+                                                    i.waktu
+                                                FROM tb_izin i
+                                                JOIN tb_mahasiswa m ON i.id_mahasiswa = m.id_mahasiswa
+                                                JOIN tb_mahasiswa_kelompok mk ON m.id_mahasiswa = mk.id_mahasiswa
+                                                JOIN tb_kelompok_pembimbing kp ON mk.id_kelompok = kp.id_kelompok
+                                                WHERE kp.id_pembimbing = '$id_pembimbing'
+                                                ORDER BY m.id_mahasiswa, i.waktu
+                                                ";
+
+                                                // Eksekusi query statistik
+                                                $result_statistik = mysqli_query($koneksi, $sql_statistik);
+
+                                                // Simpan statistik dalam array untuk akses cepat
+                                                $statistik = [];
+                                                while ($row_statistik = mysqli_fetch_assoc($result_statistik)) {
+                                                    $statistik[$row_statistik['id_mahasiswa']] = $row_statistik;
+                                                }
+
+                                                // Eksekusi query detail izin
+                                                $result_izin_detail = mysqli_query($koneksi, $sql_izin_detail);
+
+                                                // Variabel untuk menyimpan ID mahasiswa sebelumnya
+                                                $current_mahasiswa = null;
+
+                                                // Loop untuk menampilkan data
+                                                while ($row_izin_detail = mysqli_fetch_array($result_izin_detail)) {
+                                                    // Jika mahasiswa berubah, tampilkan header baru dan statistik
+                                                    if ($current_mahasiswa != $row_izin_detail['id_mahasiswa']) {
+                                                        if ($current_mahasiswa !== null) {
+                                                            // Tambahkan garis pembatas antar mahasiswa
+                                                            echo "<hr>";
+                                                        }
+
+                                                        $id = $row_izin_detail['id_mahasiswa'];
+                                                        echo "<h5>{$row_izin_detail['id_mahasiswa']} {$row_izin_detail['nama']}</h5>";
+                                                        echo "<p><strong>Total Hadir:</strong> {$statistik[$id]['total_hadir']} kali<br>";
+                                                        echo "<strong>Total Izin:</strong> {$statistik[$id]['total_izin']} kali<br>";
+                                                        echo "<strong>Total Sakit:</strong> {$statistik[$id]['total_sakit']} kali</p>";
+
+                                                        $current_mahasiswa = $row_izin_detail['id_mahasiswa'];
+                                                    }
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> <!-- Alert box for Nama Kelompok -->
+
                             </div>
                         </div>
-                        <!-- Card for total absensi per mahasiswa -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Total Absensi per Mahasiswa</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <?php
-                                        // Query to count the total absensi per mahasiswa
-                                        $sql_absensi_count = "
-                SELECT 
-                    m.id_mahasiswa,
-                    m.nama,
-                    COUNT(DISTINCT a.id) AS total_absensi
-                FROM tb_absensi a
-                JOIN tb_mahasiswa m ON a.id_mahasiswa = m.id_mahasiswa
-                JOIN tb_kelompok_pembimbing kp ON kp.id_kelompok = a.id_kelompok
-                WHERE kp.id_pembimbing = '$id_pembimbing'
-                GROUP BY m.id_mahasiswa
-                ";
 
-                                        // Execute the query to get the count of absensi per mahasiswa
-                                        $result_absensi_count = mysqli_query($koneksi, $sql_absensi_count);
-
-                                        // Fetch and display the total absensi for each mahasiswa
-                                        while ($row_absensi_count = mysqli_fetch_array($result_absensi_count)) {
-                                        ?>
-                                            <p><?php echo $row_absensi_count['id_mahasiswa']; ?> <?php echo $row_absensi_count['nama']; ?> memiliki total absensi: <strong><?php echo $row_absensi_count['total_absensi']; ?></strong></p>
-                                        <?php
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="row">
                             <div class="table-responsive table--no-card m-b-30">
@@ -345,7 +422,67 @@ $query_pagination = mysqli_query($koneksi, $sql_pagination);
                                 <a class="page-link" href="?halaman=<?php echo $halaman + 1; ?>">Next</a>
                             </li>
                         </ul>
+                        <div class="m-5"></div>
+                        <div class="row">
+                            <div class="table-responsive table--no-card m-b-30">
+                                <table class="table table-borderless table-striped table-earning">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>STB</th>
+                                            <th>Nama</th>
+                                            <th>Keterangan</th>
+                                            <th>Alasan</th>
+                                            <th>Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $no = $offset + 1; // Nomor urut data
+                                        while ($row_izin = mysqli_fetch_assoc($query_izin)) {
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $no++; ?></td>
+                                                <td><?php echo $row_izin['id_mahasiswa']; ?></td>
+                                                <td><?php echo $row_izin['nama']; ?></td>
+                                                <td><?php echo $row_izin['keterangan']; ?></td>
+                                                <td><?php echo $row_izin['alasan']; ?></td>
+                                                <td><?php echo $row_izin['waktu']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Pagination -->
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item">
+                                <a class="page-link"
+                                    <?php if ($page > 1) {
+                                        $Previous = $page - 1;
+                                        echo "href='?page=$Previous'";
+                                    } ?>>Previous</a>
+                            </li>
+                            <?php
+                            for ($x = 1; $x <= $total_pages; $x++) {
+                            ?>
+                                <li class="page-item <?php if ($x == $page) echo 'active'; ?>">
+                                    <a class="page-link" href="?page=<?php echo $x ?>"><?php echo $x; ?></a>
+                                </li>
+                            <?php
+                            }
+                            ?>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    <?php if ($page < $total_pages) {
+                                        $next = $page + 1;
+                                        echo "href='?page=$next'";
+                                    } ?>>Next</a>
+                            </li>
+                        </ul>
+
                     </div>
+
                 </div>
             </div>
         </div>
